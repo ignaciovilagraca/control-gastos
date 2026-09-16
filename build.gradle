@@ -1,0 +1,57 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+group = 'com.xowl'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.26'
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'io.github.bonigarcia:webdrivermanager:5.9.2'
+    implementation 'org.seleniumhq.selenium:selenium-java:4.23.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
+    implementation 'mysql:mysql-connector-java:8.0.19'
+    implementation 'org.hibernate:hibernate-core:5.4.10.Final'
+    implementation 'org.slf4j:slf4j-nop:2.0.7'
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.google.apis:google-api-services-gmail:v1-rev20250331-2.0.0'
+    implementation 'com.google.auth:google-auth-library-oauth2-http:1.30.1'
+    implementation 'com.google.api-client:google-api-client:2.7.2'
+    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+}
+
+mainClassName = 'com.xowl.spending.SpendingControlApplication'
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest {
+        attributes 'Main-Class': "$mainClassName"
+    }
+
+    from(
+            configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    ) {
+        exclude 'META-INF/MANIFEST.MF'
+        exclude 'META-INF/*.SF'
+        exclude 'META-INF/*.DSA'
+        exclude 'META-INF/*.RSA'
+    }
+}

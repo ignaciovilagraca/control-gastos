@@ -1,0 +1,20 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+group = 'com.xowl'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':')
+    compileOnly 'org.projectlombok:lombok:1.18.26'
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'org.slf4j:slf4j-nop:2.0.7'
+}
+
+mainClassName = 'com.xowl.spending.bot.handler.BotHandlerApplication'

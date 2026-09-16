@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory>
+        <!-- Database connection settings.
+
+             The url, username and password are not here: SessionFactoryProvider
+             applies them from CONTROL_GASTOS_DB_URL, CONTROL_GASTOS_DB_USER and
+             CONTROL_GASTOS_DB_PASSWORD, so that a checkout of this repository
+             carries no credential. -->
+        <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+
+        <!-- SQL dialect -->
+        <property name="dialect">org.hibernate.dialect.MySQL5Dialect</property>
+
+        <!-- Validate the database schema on startup -->
+        <property name="hbm2ddl.auto">validate</property>
+
+        <!-- Names the annotated entity class -->
+        <mapping class="com.xowl.spending.frameworks.repository.SpendingEntity"/>
+    </session-factory>
+</hibernate-configuration>
