@@ -254,8 +254,13 @@ public class VisaHomeSeleniumBrowserTool implements BrowserTool {
             Object readyState = js.executeScript("return document.readyState");
             Object body = js.executeScript(
                     "return document.body ? document.body.innerText.replace(/\\s+/g,' ').substring(0,300) : '<no body>'");
+            // Next.js login shows rejections as toasts / modals; capture them even if they are off the first 300 chars.
+            Object alerts = js.executeScript(
+                    "return Array.from(document.querySelectorAll("
+                            + "'[data-testid=\"toast-container\"], [role=\"alert\"], [role=\"dialog\"], [class*=\"toast\" i], [class*=\"modal\" i], [class*=\"error\" i]'))"
+                            + ".map(e => e.innerText.replace(/\\s+/g,' ').trim()).filter(t => t).slice(0,5).join(' | ').substring(0,500)");
             return "url=" + driver.getCurrentUrl() + ", title=" + driver.getTitle()
-                    + ", readyState=" + readyState + ", body=" + body
+                    + ", readyState=" + readyState + ", alerts=" + alerts + ", body=" + body
                     + ", screenshot=" + saveDebugScreenshot(driver);
         } catch (WebDriverException e) {
             return "page state unavailable: " + e.getMessage();
@@ -306,7 +311,14 @@ public class VisaHomeSeleniumBrowserTool implements BrowserTool {
                 return findDisplayedOtpInput(d);
             });
         } catch (TimeoutException e) {
-            return;
+            if (loggedInPagePresent(driver)) {
+                return; // Prisma skipped the OTP step (e.g. remembered device): nothing to apply.
+            }
+            // Prisma rejected the attempt before generating the code (blocked user, expired password,
+            // OTP quota, unknown modal). Fail with what the page shows instead of a silent 90 s timeout later.
+            throw new IllegalStateException(
+                    "Login submitted but no OTP input appeared within 55 s and no OTP mail was requested. "
+                            + describePageState(driver), e);
         }
 
         Optional<String> code;
@@ -332,6 +344,12 @@ public class VisaHomeSeleniumBrowserTool implements BrowserTool {
                 20_000,
                 "Could not find Ingresar after email OTP verification");
         TimeUnit.SECONDS.sleep(3);
+    }
+
+    private static boolean loggedInPagePresent(WebDriver driver) {
+        return !driver.findElements(By.className("card-item")).isEmpty()
+                || !driver.findElements(By.id("cardsDropDown")).isEmpty()
+                || !driver.findElements(VER_ULTIMOS_MOVIMIENTOS).isEmpty();
     }
 
     private static WebElement findDisplayedOtpInput(WebDriver driver) {
